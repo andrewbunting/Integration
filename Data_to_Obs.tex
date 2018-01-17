@@ -1,0 +1,155 @@
+\documentclass[11pt]{amsart}
+\usepackage[centering]{geometry}           % See geometry.pdf to learn the layout options. There are lots.
+\geometry{a4paper} % ... or a4paper or a5paper  or ... letterpaper
+%\geometry{landscape}                % Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an
+%indent
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{amsmath}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{lscape}
+\usepackage{rotating}
+\setlength{\rotFPtop}{0pt plus 1fil}% <- add this line after loading rotating
+\setlength{\rotFPbot}{0pt plus 1fil}% <- maybe its better to add this line too
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+
+
+
+
+
+\title{Stellar Oscillations Tidally Induced by a Planetary Companion}
+\author{Andrew Bunting}
+%\date{}                                           % Activate to display a given date or no date
+%
+\begin{document}
+
+\maketitle
+
+
+
+\section{Introduction} \label{Introduction}
+
+This explains the maths (and hints at its implementation) used to convert the outputs of my stellar oscillation code into either a lightcurve or a spectrum for the photometric and RV detection of tidally induced oscillations respectively.
+
+
+
+\subsection{Starting point} \label{Intro:StartingPoint}
+
+The inputs required to do these calculations include the properties of the star, both in equilibrium and perturbed: $R$, the stellar equilibrium radius; $F_{0}$, the equilibrium surface flux; $\vec{\xi}$, the vector displacement of the surface; and $\vec{F}'$, the vector perturbation to the flux at the surface (although we will neglect the tangential components).  Properties of the driving mechanism for the oscillation mode are also needed: $\omega$, the frequency of the orbit; $l$ and $m$, the degree and order of the spherical harmonic of the oscillation mode; and $\Phi =  f R^{2}$, the perturbing potential at the surface.
+
+The coordinate system to be used must also be defined.  We will be using spherical coordinates based upon the star-planet system, with the direction to the planet at $(\theta, \phi) = (\frac{\pi}{2}, 0)$ at $t = 0$, and evolving as $(\frac{\pi}{2}, \omega t)$.  Therefore, the poles of the coordinate system (that is, where $\theta = 0 \, \text{or} \, \pi$) are perpendicular to the plane of the planet's orbit.  The direction to the observer is defined within these coordinates as $(\theta_{o}, \phi_{o})$, defining $\hat{n}_{o}$ as the unit vector pointing in this direction.
+
+
+
+
+
+\section{Radial Velocity} \label{RV}
+
+The motion of the surface induced by the tidal perturbation results in a spectroscopic change, due to the Doppler effect - a broadening of linewidth, and potentially a shift in the line's central frequency.
+
+\subsection{Mathematical overview} \label{RV_overview}
+
+The core of this depends upon keeping track of the vector motion of the surface, using:
+
+\begin{equation}
+\vec{v} = \frac{\partial}{\partial t} \vec{r} = \frac{\partial}{\partial t} ( R \hat{r} + \vec{\xi} ) = \frac{\partial}{\partial t} \vec{\xi} .
+\end{equation}
+
+The radial velocity measured is the projection of this surface velocity along the line of sight of the observer:
+
+\begin{equation}
+v_{RV} = \vec{v} \cdot \hat{n}_{o}.
+\end{equation}
+
+To calculate the effect on an idealised emission line, both the radial velocity and the luminosity of the surface element must be known.  The perturbation to the luminosity of the surface element due to the tidally induced oscillations is neglected, but the change in luminosity due to the angle between the surface normal and the observer must be taken into account, both in terms of projecting the flux and area to get the luminosity, and in terms of limb darkening.
+
+Limb darkening is given as:
+
+\begin{equation}
+h = c \, ( 1 - u (1 - \hat{r} \! \cdot \! \hat{n}_{o}) )
+\end{equation}
+
+where the value of $u$ determines the model of limb-darkening that you are using, and $c$ normalises $h$, so that $\int_{0}^{1} \, h \, \mu \, \text{d}\mu = 1$ \cite{Pfahl2008}, and therefore $\int h \, \hat{n}_{o} \! \cdot \! \vec{\text{d} S} = \pi$, preserving the total projected area.  For Eddington limb-darkening $c = 1$ and $u = 0.6$.
+
+The luminosity of the surface element requires both the flux and the area to be projected along the line of sight.  This gives us the equation for the luminosity of a surface element \cite{Pfahl2008} as:
+
+\begin{equation}
+\text{d}L = h \, F_{0} \hat{r} \cdot \hat{n}_{o} \, \vec{\text{d}S} \! \cdot \! \hat{n}_{o}
+\end{equation}
+
+where the equilibrium surface flux, equilibrium surface normal and equilibrium surface element area are all used because the impact on the luminosity of the element will be negligible.
+
+To combine these to produce the spectrum, the contribution to the luminosity at that radial velocity from each surface element must be summed.  This leads to the summation for each radial velocity bin, $v_{RV_{i}}$:
+
+\begin{equation}
+L_{i} = \sum \text{d}L
+\end{equation}
+
+where the sum runs over the elements for which both $\hat{r} \cdot \hat{n}_{o} > 0$ and $| v_{RV} - v_{RV_{i}} | < \frac{\delta v_{RV}}{2}$ (where $v_{RV_{i}}$ is the central radial velocity of the bin, and $\delta v_{RV}$ is the bin width) which ensures both that the element is visible and has the appropriate radial velocity for that bin.
+
+
+
+\subsection{Implementation} \label{RV:Implementation}
+
+Here I run through a more detailed version of what's going on, including the practicalities of what exactly can be taken directly from the oscillation code, and what you need to do a little calculating to get to.
+
+In the $l=2$, $m=2$ spherical oscillation mode, the variables oscillate as:
+
+\begin{equation}
+q = \Re \left(  \left( q_{r} + i q_{i} \right)  3 \sin^{2}(\theta) e^{2 i ( \omega t - \phi)}   \right)   =    3 \sin^{2}(\theta) \left(  q_{r} \cos \left( 2 ( \omega t - \phi) \right)  - q_{i} \sin \left( 2 ( \omega t - \phi) \right) \right) 
+\end{equation}
+
+which enables $\xi_{r}$, that is, the radial displacement (unfortunately the notation regarding real and radial is a bit confusing, but is usually understood within context), to be calculated easily by substituting it for $q$, the dummy variable in the above equation.  The tangential displacement, however, is not directly calculated by the oscillation code, and therefore requires a bit more work.
+
+Using
+
+\begin{equation} \label{eq:mom_lin}
+\rho_{0} \frac{\partial^{2} \vec{\xi}}{\partial t^{2}} = - \vec{\nabla} p' - \rho_{0} \vec{\nabla} \Phi_{P}
+- \rho' \vec{\nabla} \Phi_{0}
+\end{equation}
+
+the tangential displacement is found to be
+
+\begin{equation}
+\vec{\xi}_{\perp} = \Re \left(   \frac{1}{m^{2} \omega^{2}}  \vec{\nabla}_{\perp}  \left(   \frac{p'}{\rho_{0}}  +  \Phi_{p}   \right) \right).
+\end{equation}
+
+which, when expressed using the explicit form of the oscillations, becomes
+
+\begin{equation}
+\vec{\xi}_{\perp} = \Re \left(   \frac{1}{m^{2} \omega^{2}}  \left(   \frac{p'_{r}}{\rho_{0}}  +  f r^{2} + i \frac{p'_{i}}{\rho_{0}}   \right)   \vec{\nabla}_{\perp}  \left(   3 \sin^{2}(\theta) e^{2 i ( \omega t - \phi)}   \right)  \right)
+\end{equation}
+
+where $f = - \frac{G m_{p}}{4 D^{3}}$ is used to replace $\phi_{p}$ according to $\phi_{p} = f r^{2}$
+
+The tangential gradient is given by $\vec{\nabla}_{\perp} = \hat{\theta} \frac{1}{r} \frac{\partial}{\partial \theta} + \hat{\phi} \frac{\partial}{\partial \phi}$.  Using this, and taking the real part gives the final expression for the tangential displacement of the surface:
+
+\begin{multline}
+\vec{\xi}_{\perp} =    \frac{6 \sin(\theta)}{r m^{2} \omega^{2}}  \Bigg\{  \left(   \frac{p'_{r}}{\rho_{0}}  +  f r^{2} \right) \left[ \cos(2( \omega t - \phi )) \cos(\theta) \hat{\theta}  +  \sin(2( \omega t - \phi )) \hat{\phi} \right] \\
+ + \frac{p'_{i}}{\rho_{0}}  \left[ \cos(2( \omega t - \phi )) \hat{\phi}  -  \sin(2( \omega t - \phi )) \cos(\theta) \hat{\theta} \right]    \Bigg\}
+\end{multline}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\bibliographystyle{plain}
+\bibliography{library}
+
+
+
+\end{document}  
