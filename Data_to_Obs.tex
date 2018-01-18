@@ -73,15 +73,23 @@ Limb darkening is given as:
 h = c \, ( 1 - u (1 - \hat{r} \! \cdot \! \hat{n}_{o}) )
 \end{equation}
 
-where the value of $u$ determines the model of limb-darkening that you are using, and $c$ normalises $h$, so that $\int_{0}^{1} \, h \, \mu \, \text{d}\mu = 1$ \cite{Pfahl2008}, and therefore $\int h \, \hat{n}_{o} \! \cdot \! \vec{\text{d} S} = \pi$, preserving the total projected area.  For Eddington limb-darkening $c = 1$ and $u = 0.6$.
+where the value of $u$ determines the model of limb-darkening that you are using, and $c$ normalises $h$, so that $\int_{0}^{1} \, h \, \mu \, \text{d}\mu = 1$, and therefore $\int h \, \hat{n}_{o} \! \cdot \! \vec{\text{d} S} = \pi$, preserving the total projected area.  For Eddington limb-darkening $c = 1$ and $u = 0.6$.
 
-The luminosity of the surface element requires both the flux and the area to be projected along the line of sight.  This gives us the equation for the luminosity of a surface element \cite{Pfahl2008} as:
+The luminosity of the surface element requires both the flux and the area to be projected along the line of sight, as shown in figure \ref{fig:flux_diagram}.  This gives us the equation for the luminosity of a surface element as:
 
 \begin{equation}
 \text{d}L = h \, F_{0} \hat{r} \cdot \hat{n}_{o} \, \vec{\text{d}S} \! \cdot \! \hat{n}_{o}
 \end{equation}
 
 where the equilibrium surface flux, equilibrium surface normal and equilibrium surface element area are all used because the impact on the luminosity of the element will be negligible.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width = 0.75 \textwidth]{flux_diagram.png}
+\caption{This diagram shows the normal to the surface, n; the unit vector towards the observer, $n_{o}$; the surface element of the star, d$S$; the projected surface element, d$S'$; and the vector flux, $F$, which need not be parallel to the surface normal.  Hats and arrows have not been included in the diagram because this diagram was drawn up fairly speedily.  To determine the power towards the observer, we must calculate $\vec{F} \! \cdot \! \vec{\text{d} S'}$.  The magnitude of $\vec{\text{d} S'}$ is determined by the projection of $\vec{\text{d} S}$ along $\hat{n}_{o}$, and it's direction is $\hat{n}_{o}$.  This leads to $\vec{F} \cdot ( (\vec{\text{d} S} \cdot \hat{n}_{o}) \hat{n}_{o} )$ which can be expressed as $\text{d}L = ( \vec{F} \cdot \hat{n}_{o})   (\hat{n} \cdot \hat{n}_{o}) \, \text{d} S$}
+\label{fig:flux_diagram}
+\end{center}
+\end{figure}
 
 To combine these to produce the spectrum, the contribution to the luminosity at that radial velocity from each surface element must be summed.  This leads to the summation for each radial velocity bin, $v_{RV_{i}}$:
 
@@ -96,6 +104,8 @@ where the sum runs over the elements for which both $\hat{r} \cdot \hat{n}_{o} >
 \subsection{Implementation} \label{RV:Implementation}
 
 Here I run through a more detailed version of what's going on, including the practicalities of what exactly can be taken directly from the oscillation code, and what you need to do a little calculating to get to.
+
+\subsubsection{Surface velocity} \label{RV:Implementation:SurfVel}
 
 In the $l=2$, $m=2$ spherical oscillation mode, the variables oscillate as:
 
@@ -130,8 +140,93 @@ The tangential gradient is given by $\vec{\nabla}_{\perp} = \hat{\theta} \frac{1
 
 \begin{multline}
 \vec{\xi}_{\perp} =    \frac{6 \sin(\theta)}{r m^{2} \omega^{2}}  \Bigg\{  \left(   \frac{p'_{r}}{\rho_{0}}  +  f r^{2} \right) \left[ \cos(2( \omega t - \phi )) \cos(\theta) \hat{\theta}  +  \sin(2( \omega t - \phi )) \hat{\phi} \right] \\
- + \frac{p'_{i}}{\rho_{0}}  \left[ \cos(2( \omega t - \phi )) \hat{\phi}  -  \sin(2( \omega t - \phi )) \cos(\theta) \hat{\theta} \right]    \Bigg\}
+ + \frac{p'_{i}}{\rho_{0}}  \left[ \cos(2( \omega t - \phi )) \hat{\phi}  -  \sin(2( \omega t - \phi )) \cos(\theta) \hat{\theta} \right]    \Bigg\}.
 \end{multline}
+
+By recalling the full form of the radial displacement, we have the full vector form of the displacement:
+
+\begin{multline}
+\vec{\xi} =    3 \sin^{2}(\theta) \left(  \xi_{r} \cos \left( 2 ( \omega t - \phi) \right)  - \xi_{i} \sin \left( 2 ( \omega t - \phi) \right) \right) \hat{r} \\
++ \frac{6 \sin(\theta)}{r m^{2} \omega^{2}}  \Bigg\{  \left(   \frac{p'_{r}}{\rho_{0}}  +  f r^{2} \right) \left[ \cos(2( \omega t - \phi )) \cos(\theta) \hat{\theta}  +  \sin(2( \omega t - \phi )) \hat{\phi} \right] \\
+ + \frac{p'_{i}}{\rho_{0}}  \left[ \cos(2( \omega t - \phi )) \hat{\phi}  -  \sin(2( \omega t - \phi )) \cos(\theta) \hat{\theta} \right]    \Bigg\}.
+\end{multline}
+
+which is converted into the surface velocity by taking the partial time derivative, giving, when grouped according to unit vector:
+
+\begin{multline} \label{eq:vprime_full}
+\vec{v'} = \frac{\partial \vec{\xi}}{\partial t} =    - 6 \omega \sin^{2}(\theta) \Big(  \xi_{r} \sin \left( 2 ( \omega t - \phi) \right)  + \xi_{i} \cos \left( 2 ( \omega t - \phi) \right) \Big) \hat{r} \\
++ \frac{12 \sin(\theta)}{r m^{2} \omega}  \Bigg\{  - \left[ \left(   \frac{p'_{r}}{\rho_{0}}  +  f r^{2} \right) \sin(2( \omega t - \phi ))  + \frac{p'_{i}}{\rho_{0}} \cos (2( \omega t - \phi )) \right]  \cos(\theta) \hat{\theta}  \\
++  \left[ \left(   \frac{p'_{r}}{\rho_{0}}  +  f r^{2} \right) \cos (2( \omega t - \phi )) - \frac{p'_{i}}{\rho_{0}} \sin(2( \omega t - \phi )) \right] \hat{\phi}    \Bigg\}.
+\end{multline}
+
+
+\subsubsection{Radial Velocity} \label{RV:Implementation:RV}
+
+For simplicity, equation \ref{eq:vprime_full} will be rewritten as:
+
+\begin{equation} \label{eq:vprime_short}
+\vec{v'} = v'_{r} \hat{r} + v'_{\theta} \hat{\theta} + v'_{\phi} \hat{\phi}
+\end{equation}
+
+where the components can be found by comparing equation \ref{eq:vprime_short} with equation \ref{eq:vprime_full}.
+
+To get the measured radial velocity, the surface velocity must be projected along the line of sight of the observer, giving
+
+\begin{equation}
+v_{RV} = \vec{v'} \cdot \hat{n}_{o}.
+\end{equation}
+
+This is most simply done using the cartesian coordinate system with $\hat{x}$ aligned with the vector pointing to the planet at $t = 0$, $\hat{y}$ pointing to the planet at $\omega t = \frac{\pi}{2}$, and $\hat{z}$ aligned with the angular momentum vector of the system.  In these coordinates, we have:
+
+\begin{equation}
+\hat{n}_{o} = \sin(\theta_{o}) \cos(\phi_{o}) \hat{x} + \sin(\theta_{o}) \sin(\phi_{o}) \hat{y} + \cos(\theta_{o}) \hat{z}
+\end{equation}
+
+\begin{equation}
+\hat{r} = \sin(\theta) \cos(\phi) \hat{x} + \sin(\theta) \sin(\phi) \hat{y} + \cos(\theta) \hat{z}
+\end{equation}
+
+\begin{equation}
+\hat{\theta} = \cos(\theta) \cos(\phi) \hat{x} + \cos(\theta) \sin(\phi) \hat{y} - \sin(\theta) \hat{z}
+\end{equation}
+
+\begin{equation}
+\hat{\phi} = - \sin(\phi) \hat{x} + \cos(\phi) \hat{y}
+\end{equation}
+
+
+\subsubsection{Converting this to code}  \label{RV:Implementation:Code}
+
+I will briefly describe how this maths is actually implemented in the code, which is largely a brute force approach.
+
+For each point in time over the course of a planetary orbit, a spectrum must be calculated.  Therefore $\omega t$ is quantised and runs from $0$ to $\pi$ (as the oscillations have twice the frequency of the planetary orbit).
+
+At each value of $\omega t$, every surface element of the star will be assessed and will only have its luminosity included if $\hat{r} \! \cdot \! \hat{n}_{o} > 0$, such that that surface element is visible at that point in time.  For each visible surface element, the luminosity and radial velocity will both be calculated.  The radial velocity determines which bin to add the luminosity, and once the sum has run over the whole star, the spectrum for that timestep is complete, so it is therefore saved.  Then the luminosities can be reset and the process starts again for the next timestep.
+
+
+
+
+
+
+
+
+\section{Luminosity variation} \label{Lum}
+
+In this section, the method for producing the lightcurves due to the oscillations is covered.  To do this, the first order change in each variable in the integral must be computed.  Each variable will have its own subsection.
+
+The full integral, just as a refresher, is:
+
+\begin{equation}
+L = \int \int h \, \vec{F} \! \cdot \! \hat{n}_{o} \, \hat{n}_{o} \! \cdot \! \hat{n} \, \text{d}S
+\end{equation}
+
+
+\subsection{Surface Normal} \label{Lum:Norm}
+
+To find the normal to the surface, we normalise $\frac{\partial r}{\partial \theta} \hat{\theta} \times \frac{\partial r}{\partial \phi} \hat{\phi}$ where $r$ defines the surface of the star as a function of $\theta$ and $\phi$.
+
+This leads to:
+
 
 
 
