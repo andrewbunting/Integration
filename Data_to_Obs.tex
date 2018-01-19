@@ -39,7 +39,7 @@ This explains the maths (and hints at its implementation) used to convert the ou
 
 \subsection{Starting point} \label{Intro:StartingPoint}
 
-The inputs required to do these calculations include the properties of the star, both in equilibrium and perturbed: $R$, the stellar equilibrium radius; $F_{0}$, the equilibrium surface flux; $\vec{\xi}$, the vector displacement of the surface; and $\vec{F}'$, the vector perturbation to the flux at the surface (although we will neglect the tangential components).  Properties of the driving mechanism for the oscillation mode are also needed: $\omega$, the frequency of the orbit; $l$ and $m$, the degree and order of the spherical harmonic of the oscillation mode; and $\Phi =  f R^{2}$, the perturbing potential at the surface.
+The inputs required to do these calculations include the properties of the star, both in equilibrium and perturbed: $R$, the stellar equilibrium radius; $F_{0}$, the equilibrium surface flux; $\vec{\xi}$, the vector displacement of the surface; and $\vec{F}'$, the vector perturbation to the flux at the surface (although this is the Eulerian perturbation, and we will need to use the Lagrangian perturbation, which is a simple conversion of $\Delta \vec{F} = \vec{F'} + ( \vec{\xi} \cdot \vec{\nabla} ) \vec{F}_{0}$ ).  Properties of the driving mechanism for the oscillation mode are also needed: $\omega$, the frequency of the orbit; $l$ and $m$, the degree and order of the spherical harmonic of the oscillation mode; and $\Phi =  f R^{2}$, the perturbing potential at the surface.
 
 The coordinate system to be used must also be defined.  We will be using spherical coordinates based upon the star-planet system, with the direction to the planet at $(\theta, \phi) = (\frac{\pi}{2}, 0)$ at $t = 0$, and evolving as $(\frac{\pi}{2}, \omega t)$.  Therefore, the poles of the coordinate system (that is, where $\theta = 0 \, \text{or} \, \pi$) are perpendicular to the plane of the planet's orbit.  The direction to the observer is defined within these coordinates as $(\theta_{o}, \phi_{o})$, defining $\hat{n}_{o}$ as the unit vector pointing in this direction.
 
@@ -78,7 +78,7 @@ where the value of $u$ determines the model of limb-darkening that you are using
 The luminosity of the surface element requires both the flux and the area to be projected along the line of sight, as shown in figure \ref{fig:flux_diagram}.  This gives us the equation for the luminosity of a surface element as:
 
 \begin{equation}
-\text{d}L = h \, F_{0} \hat{r} \cdot \hat{n}_{o} \, \vec{\text{d}S} \! \cdot \! \hat{n}_{o}
+\text{d}L = h \, \bar{F}_{0} \, \vec{\text{d}S} \! \cdot \! \hat{n}_{o}
 \end{equation}
 
 where the equilibrium surface flux, equilibrium surface normal and equilibrium surface element area are all used because the impact on the luminosity of the element will be negligible.
@@ -86,7 +86,7 @@ where the equilibrium surface flux, equilibrium surface normal and equilibrium s
 \begin{figure}
 \begin{center}
 \includegraphics[width = 0.75 \textwidth]{flux_diagram.png}
-\caption{This diagram shows the normal to the surface, n; the unit vector towards the observer, $n_{o}$; the surface element of the star, d$S$; the projected surface element, d$S'$; and the vector flux, $F$, which need not be parallel to the surface normal.  Hats and arrows have not been included in the diagram because this diagram was drawn up fairly speedily.  To determine the power towards the observer, we must calculate $\vec{F} \! \cdot \! \vec{\text{d} S'}$.  The magnitude of $\vec{\text{d} S'}$ is determined by the projection of $\vec{\text{d} S}$ along $\hat{n}_{o}$, and it's direction is $\hat{n}_{o}$.  This leads to $\vec{F} \cdot ( (\vec{\text{d} S} \cdot \hat{n}_{o}) \hat{n}_{o} )$ which can be expressed as $\text{d}L = ( \vec{F} \cdot \hat{n}_{o})   (\hat{n} \cdot \hat{n}_{o}) \, \text{d} S$}
+\caption{This diagram shows the normal to the surface, n; the unit vector towards the observer, $n_{o}$; the surface element of the star, d$S$; the projected surface element, d$S'$; and the vector flux, $F$, which need not be parallel to the surface normal.  Hats and arrows have not been included to denote vectors in the diagram because it was drawn up fairly speedily.  The luminosity from the surface is given by $\vec{F} \! \cdot \! \vec{\text{d}S'}$, which is the power passing through the surface.  The surface then radiates equally in all directions, so the angle-averaged flux should be thought of as a measure of luminosity per unit area, and is therefore a scalar and not a vector, which is $\bar{F} \propto \vec{F} \! \cdot \! \vec{\text{d}S}$.  Therefore the luminosity observed will be equal to this angle-averaged flux multiplied by the projected area of the surface element, $\text{d}S'$; leading to $\text{d}L = \bar{F} \, \hat{n} \! \cdot \! \hat{n}_{o} \, \text{d}S$.}
 \label{fig:flux_diagram}
 \end{center}
 \end{figure}
@@ -217,23 +217,127 @@ In this section, the method for producing the lightcurves due to the oscillation
 The full integral, just as a refresher, is:
 
 \begin{equation}
-L = \int \int h \, \vec{F} \! \cdot \! \hat{n}_{o} \, \hat{n}_{o} \! \cdot \! \hat{n} \, \text{d}S
+L = \int \int h \, \bar{F} \, \hat{n}_{o} \! \cdot \! \hat{n} \, \text{d}S
 \end{equation}
+
+where $\bar{F}$ is the angle-averaged flux, which can be re-expressed as:
+
+\begin{equation}
+L + \Delta L = L + \Delta L_{h} + \Delta L_{F} + \Delta L_{n} + \Delta L_{S}
+\end{equation}
+
+where $\Delta L_{h}$ is the change in luminosity due to the effect of the perturbation on limb-darkening, $\Delta L_{F}$ is the change in luminosity due to the perturbed flux, $\Delta L_{n}$ is the change in luminosity due to the change in surface normal, and $\Delta L_{S}$ is the change in luminosity due to the change in surface area.
+
+\subsection{Change in Limb-darkening} \label{Lum:LD}
+
+We start with the general limb-darkening formula:
+
+\begin{equation}
+h = c \, ( 1 - u (1 - \hat{n} \! \cdot \! \hat{n}_{o}) )
+\end{equation}
+
+which is obviously perturbed by the change in surface normal, to give:
+
+\begin{equation}
+\Delta h = c \, \Delta \hat{n} \! \cdot \! \hat{n}_{o}
+\end{equation}
+
+which leads to
+
+\begin{equation}
+\Delta L_{h} = \int \int \Delta h \, \bar{F} \, \hat{n}_{o} \! \cdot \! \hat{n} \, \text{d}S
+\end{equation}
+
+
+
+\subsection{Change in flux} \label{Lum:F}
+
+For this, the perturbation to the angle-averaged flux replaces the equilibrium flux to give
+
+\begin{equation}
+\Delta L_{F} = \int \int h \, \Delta \bar{F} \, \hat{n}_{o} \! \cdot \! \hat{n} \, \text{d}S
+\end{equation}
+
+where $\Delta \bar{F}$ is the perturbation to the angle-averaged flux.  This comes from
+
+\begin{equation}
+\bar{F} \propto \frac{1}{2} \vec{F} \! \cdot \! \vec{\text{d}S} = \frac{1}{2} \vec{F} \! \cdot \! \hat{n} \, \text{d}S
+\end{equation}
+
+which becomes, to first order
+
+\begin{equation}
+\bar{F} \propto \frac{1}{2} \vec{F}_{0} \! \cdot \! \hat{r} \, \text{d}S  +  \frac{1}{2} \vec{F'} \! \cdot \! \hat{r} \, \text{d}S  +  \frac{1}{2} \vec{F}_{0} \! \cdot \! \Delta \hat{n} \, \text{d}S
+\end{equation}
+
 
 
 \subsection{Surface Normal} \label{Lum:Norm}
 
-To find the normal to the surface, we normalise $\frac{\partial r}{\partial \theta} \hat{\theta} \times \frac{\partial r}{\partial \phi} \hat{\phi}$ where $r$ defines the surface of the star as a function of $\theta$ and $\phi$.
+To find the normal to the surface, we normalise $\frac{\partial \vec{r}}{\partial \theta} \times \frac{\partial \vec{r}}{\partial \phi}$ where $\vec{r}$ defines the surface of the star as a function of $\theta$ and $\phi$.
 
 This leads to:
 
+\begin{equation}
+\hat{n} = \hat{r} + \Delta \hat{n}
+\end{equation}
+
+where no re-normalisation is required because the normalisation constant is, to first order, $1$.  This is found to be
+
+\begin{equation}
+\hat{n} = \hat{r} - \frac{1}{R} \frac{\partial r}{\partial \theta} \hat{\theta} - \frac{1}{R \sin \theta} \frac{\partial r}{\partial \phi} \hat{\phi}   \Longrightarrow  \Delta \hat{n} =  - \frac{1}{R} \frac{\partial r}{\partial \theta} \hat{\theta} - \frac{1}{R \sin \theta} \frac{\partial r}{\partial \phi} \hat{\phi} 
+\end{equation}
+
+where $r = |\vec{r}|$.  Using the explicit form of $\xi$, this becomes
+
+\begin{equation}
+\Delta \hat{n} =  - \frac{6 \sin \theta}{R} \left\{ \left[ \xi_{r} \cos (2 ( \omega t - \phi)) - \xi_{i} \sin (2 ( \omega t - \phi)) \right] \cos \theta \, \hat{\theta}  +  \left[ \xi_{r} \sin (2 ( \omega t - \phi)) + \xi_{i} \cos (2 ( \omega t - \phi)) \right] \, \hat{\phi}  \right\}
+\end{equation}
+
+This is used in the final result, which is
+
+\begin{equation}
+\Delta L_{n} = \int \int h \, \bar{F} \, \hat{n}_{o} \! \cdot \! \Delta \hat{n} \, \text{d}S
+\end{equation}
 
 
+\subsection{Surface Area} \label{Lum:S}
 
+The area of a surface element is given by
 
+\begin{equation}
+\text{d}S = r^{2} \sin \theta \,\text{d} \theta \, \text{d} \phi
+\end{equation}
 
+which, for the equilibrium star, is simply
 
+\begin{equation}
+\text{d}S_{0} = R^{2} \sin \theta \,\text{d} \theta \, \text{d} \phi .
+\end{equation}
 
+Taking account of the perturbation to the surface as a small change to the equilibrium radius, $\Delta r$, gives
+
+\begin{equation}
+\text{d}S = (R + \Delta r)^{2} \sin \theta \,\text{d} \theta \, \text{d} \phi = (R^{2} + 2 R \Delta r + (\Delta r)^{2} ) \sin \theta \,\text{d} \theta \, \text{d} \phi 
+\end{equation}
+
+Keeping only first order terms, and separating off the equilibrium area element, we are left with
+
+\begin{equation}
+\text{d}S' = 2 R \Delta r \sin \theta \,\text{d} \theta \, \text{d} \phi   \Longrightarrow  \text{d}S' = 6 R \sin^{2} \theta  \left[ \xi_{r} \cos (2 ( \omega t - \phi)) - \xi_{i} \sin (2 ( \omega t - \phi)) \right]  \sin \theta \,\text{d} \theta \, \text{d} \phi 
+\end{equation}
+
+which gives the ratio
+
+\begin{equation}
+\frac{\text{d}S'}{\text{d}S}  =  \frac{6 \sin^{2} \theta}{R}  \left[ \xi_{r} \cos (2 ( \omega t - \phi)) - \xi_{i} \sin (2 ( \omega t - \phi)) \right] .
+\end{equation}
+
+This is then used to calculate the final expression for the change in luminosity due to the change in area as
+
+\begin{equation}
+\Delta L_{S} = \int \int h \, \bar{F} \, \hat{n}_{o} \! \cdot \! \hat{n} \, \frac{\text{d}S'}{\text{d}S} \, \text{d}S.
+\end{equation}
 
 
 
