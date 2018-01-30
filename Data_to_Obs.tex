@@ -86,7 +86,7 @@ where the equilibrium surface flux, equilibrium surface normal and equilibrium s
 \begin{figure}
 \begin{center}
 \includegraphics[width = 0.75 \textwidth]{flux_diagram.png}
-\caption{This diagram shows the normal to the surface, n; the unit vector towards the observer, $n_{o}$; the surface element of the star, d$S$; the projected surface element, d$S'$; and the vector flux, $F$, which need not be parallel to the surface normal.  Hats and arrows have not been included to denote vectors in the diagram because it was drawn up fairly speedily.  The luminosity from the surface is given by $\vec{F} \! \cdot \! \vec{\text{d}S'}$, which is the power passing through the surface.  The surface then radiates equally in all directions, so the angle-averaged flux should be thought of as a measure of luminosity per unit area, and is therefore a scalar and not a vector, which is $\bar{F} \propto \vec{F} \! \cdot \! \vec{\text{d}S}$.  Therefore the luminosity observed will be equal to this angle-averaged flux multiplied by the projected area of the surface element, $\text{d}S'$; leading to $\text{d}L = \bar{F} \, \hat{n} \! \cdot \! \hat{n}_{o} \, \text{d}S$.}
+\caption{This diagram shows the normal to the surface, n; the unit vector towards the observer, $n_{o}$; the surface element of the star, d$S$; the projected surface element, d$S'$; and the vector flux, $F$, which need not be parallel to the surface normal.  Hats and arrows have not been included to denote vectors in the diagram because it was drawn up fairly speedily.  The luminosity from the surface is given by $\vec{F} \! \cdot \! \vec{\text{d}S'}$, which is the power passing through the surface.  The surface then radiates equally in all directions, so the angle-averaged flux should be thought of as a measure of luminosity per unit area, and is therefore a scalar and not a vector, which is $\bar{F} \propto \vec{F} \! \cdot \! \hat{n}$.  Therefore the luminosity observed will be equal to this angle-averaged flux multiplied by the projected area of the surface element, $\text{d}S'$; leading to $\text{d}L = \bar{F} \, \hat{n} \! \cdot \! \hat{n}_{o} \, \text{d}S$.}
 \label{fig:flux_diagram}
 \end{center}
 \end{figure}
@@ -239,13 +239,13 @@ h = c \, ( 1 - u (1 - \hat{n} \! \cdot \! \hat{n}_{o}) )
 which is obviously perturbed by the change in surface normal, to give:
 
 \begin{equation}
-\Delta h = c \, \Delta \hat{n} \! \cdot \! \hat{n}_{o}
+\Delta h = c u \, \Delta \hat{n} \! \cdot \! \hat{n}_{o}
 \end{equation}
 
 which leads to
 
 \begin{equation}
-\Delta L_{h} = \int \int \Delta h \, \bar{F} \, \hat{n}_{o} \! \cdot \! \hat{n} \, \text{d}S
+\Delta L_{h} = \int \int \Delta h \, \bar{F} \, \hat{n}_{o} \! \cdot \! \hat{r} \, \text{d}S
 \end{equation}
 
 
@@ -261,15 +261,16 @@ For this, the perturbation to the angle-averaged flux replaces the equilibrium f
 where $\Delta \bar{F}$ is the perturbation to the angle-averaged flux.  This comes from
 
 \begin{equation}
-\bar{F} \propto \frac{1}{2} \vec{F} \! \cdot \! \vec{\text{d}S} = \frac{1}{2} \vec{F} \! \cdot \! \hat{n} \, \text{d}S
+\bar{F} = \vec{F} \! \cdot \! \hat{n}
 \end{equation}
 
 which becomes, to first order
 
 \begin{equation}
-\bar{F} \propto \frac{1}{2} \vec{F}_{0} \! \cdot \! \hat{r} \, \text{d}S  +  \frac{1}{2} \vec{F'} \! \cdot \! \hat{r} \, \text{d}S  +  \frac{1}{2} \vec{F}_{0} \! \cdot \! \Delta \hat{n} \, \text{d}S
+\bar{F} = \vec{F}_{0} \! \cdot \! \hat{r}   +   \Delta \vec{F} \! \cdot \! \hat{r}  +  \vec{F}_{0} \! \cdot \! \Delta \hat{n}.
 \end{equation}
 
+Note the use of the Lagrangian perturbation of the flux, as opposed to the Eulerian form.
 
 
 \subsection{Surface Normal} \label{Lum:Norm}
