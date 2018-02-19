@@ -62,6 +62,23 @@ int main()
     
   
     
+    // These are the variables for the disc-integrated RV
+    double m, omega, p_prime_r, p_prime_i, rho_0, f_grav, v_RV_avg;
+    
+    
+    m = 2.0;
+    
+    omega = 1.719741e-5;
+    
+    p_prime_r = -4.44911111;
+    
+    p_prime_i = 54808.82553*(-8.727223541e-5);
+    
+    rho_0 = 1.48995335133e-07;
+    
+    f_grav = -7.0482251937123e-14;
+    
+    
     
     
     
@@ -75,7 +92,7 @@ int main()
     
     theta_0 = 0.5*pi;
     
-    phi_0 = 0.8;
+    phi_0 = 0.0;
     
     
     // this sets the number of time-steps taken to cover omegat going from 0 to (just under) 2*pi
@@ -96,7 +113,7 @@ int main()
     
     cout << "kmax = \t" << kmax << "\n";
     
-    outfile <<  "omega*t" << "\t\t\t\t\t" << "L0" << "\t\t\t\t\t" << "Lprime" << "\t\t\t\t\t" << "( Lprime - L0 ) / L0" << "\t\t\t\t\t" << "dL_h/L0" << "\t\t\t\t\t" << "dL_f/L0" << "\t\t\t\t\t" << "dL_n/L0"  << "\t\t\t\t\t" << "dL_s/L0" << "\n";
+    outfile <<  "omega*t" << "\t\t\t\t\t" << "L0" << "\t\t\t\t\t" << "Lprime" << "\t\t\t\t\t" << "( Lprime - L0 ) / L0" << "\t\t\t\t\t" << "dL_h/L0" << "\t\t\t\t\t" << "dL_f/L0" << "\t\t\t\t\t" << "dL_n/L0"  << "\t\t\t\t\t" << "dL_s/L0" << "\t\t\t\t\t" << "v_RV_avg" << "\n";
     
     
     
@@ -132,8 +149,10 @@ int main()
         
         Lprime = L0 + dL_h + dL_f + dL_n + dL_s;
         
+        v_RV_avg = - (1.0/(2.0*pi)) * (4.0/15.0) * omega * sin(theta_0)*sin(theta_0) * (  ( xi_r + (3.0/(R*m*m*omega*omega))*( (p_prime_r/rho_0) + f_grav*R*R ) )*sin(2.0*(omegat - phi_0))   +   ( xi_i + (3.0/(R*m*m*omega*omega))*( p_prime_i/rho_0 ) )*cos(2.0*(omegat - phi_0))  );
         
-        outfile << omegat << "\t\t\t\t\t" << L0 << "\t\t\t\t\t" << Lprime << "\t\t\t\t\t" << (Lprime - L0) / L0 << "\t\t\t\t\t" << dL_h/L0 << "\t\t\t\t\t" << dL_f/L0 << "\t\t\t\t\t" << dL_n/L0 << "\t\t\t\t\t" << dL_s/L0 << "\n";
+        
+        outfile << omegat << "\t\t\t\t\t" << L0 << "\t\t\t\t\t" << Lprime << "\t\t\t\t\t" << (Lprime - L0) / L0 << "\t\t\t\t\t" << dL_h/L0 << "\t\t\t\t\t" << dL_f/L0 << "\t\t\t\t\t" << dL_n/L0 << "\t\t\t\t\t" << dL_s/L0 << "\t\t\t\t\t" << v_RV_avg << "\n";
     
     
         

@@ -130,13 +130,13 @@ int main()
     
     
     // this sets the number of time-steps taken to cover omegat going from 0 to (just under) 2*pi
-    kmax = 10;
+    kmax = 30;
     
     kmax_doub = (double) (kmax);
     
     
     // number of rings
-    N = 4000;
+    N = 1000;
     
     N_doub = (double) (N);
     
